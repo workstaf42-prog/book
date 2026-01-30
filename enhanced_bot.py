@@ -6,6 +6,7 @@ from enum import Enum
 from typing import Dict, Any, List, Optional
 
 # Класс состояния пользователя
+# Класс состояния пользователя
 class UserState(Enum):
     START = "start"
     MAIN_MENU = "main_menu"
@@ -13,6 +14,9 @@ class UserState(Enum):
     REG_NAME = "reg_name"
     REG_GENRES = "reg_genres"
     REG_GOALS = "reg_goals"
+    REGISTERING_NAME = "registering_name"  # ← ДОБАВИТЬ эту строку
+    REGISTERING_GENRES = "registering_genres"  # ← ДОБАВИТЬ если нужно
+    REGISTERING_GOALS = "registering_goals"  # ← ДОБАВИТЬ если нужно
     SCHEDULE = "schedule"
     CURRENT_BOOK = "current_book"
     VOTING = "voting"
