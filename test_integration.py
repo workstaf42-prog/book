@@ -11,8 +11,20 @@ from database_extended import DatabaseExtended
 from testing_system import TestingSystem
 class TestIntegration:
     def __init__(self):
-        self.ai_service = None
-        print("⚠️ AI-сервис отключен для запуска без ключа")
+        try:
+            self.ai_service = EnhancedAIService()
+            if not self.ai_service.is_available():
+                print("⚠️ AI-сервис недоступен, приложение работает в ограниченном режиме")
+        except Exception as e:
+            print(f"⚠️ Не удалось инициализировать AI-сервис: {e}")
+            self.ai_service = None
+    
+    # Пример метода, который использует AI-сервис
+    def use_ai_feature(self, prompt):
+        if self.ai_service and self.ai_service.is_available():
+            return self.ai_service.generate_response(prompt)
+        else:
+            return "AI-функции в данный момент недоступны"
     
     async def start_test_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Команда для начала тестирования по текущей книге"""
