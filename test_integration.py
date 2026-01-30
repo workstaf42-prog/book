@@ -1,3 +1,15 @@
+try:
+    from ai_service_enhanced import EnhancedAIService
+except ImportError:
+    # Создаем заглушку, если класс не найден
+    class EnhancedAIService:
+        def __init__(self):
+            print("Stub EnhancedAIService initialized")
+            self.client = None
+        
+        def is_available(self):
+            return False
+            
 """
 Интеграция системы тестирования в основной бот
 """
