@@ -139,6 +139,41 @@ async def show_testing_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(testing_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
+# Дополнительные состояния для совместимости с enhanced_bot
+try:
+    UserState.REG_GENRES
+except AttributeError:
+    # Добавляем недостающие состояния динамически
+    from enum import Enum
+    
+    class UserStateExtended(Enum):
+        START = "start"
+        NORMAL = "normal"
+        REGISTERING_NAME = "registering_name"
+        REGISTERING_GENRES = "registering_genres"
+        REGISTERING_GOALS = "registering_goals"
+        SUGGESTING_BOOK = "suggesting_book"
+        ADDING_NOTE = "adding_note"
+        
+        # Состояния из enhanced_bot
+        REG_GENRES = "reg_genres"
+        REG_GOALS = "reg_goals"
+        REG_NAME = "reg_name"
+        
+        # Другие возможные состояния
+        WAITING_FOR_GENRES = "waiting_for_genres"
+        WAITING_FOR_GOALS = "waiting_for_goals"
+        WAITING_FOR_FEEDBACK = "waiting_for_feedback"
+        
+        # Состояния работы с книгами
+        WAITING_FOR_RECOMMENDATION = "waiting_for_recommendation"
+        BROWSE_BOOKS = "browse_books"
+        BOOK_DETAILS = "book_details"
+    
+    # Заменяем старый enum на новый
+    UserState = UserStateExtended
+    print(f"DEBUG: Extended UserState with new states: {[s.name for s in UserState]}")
+
 async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка сообщений для финальной версии"""
     user = update.effective_user
