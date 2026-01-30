@@ -352,16 +352,16 @@ async def show_test_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.callback_query.edit_message_text(help_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
 async def enhanced_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Расширенная команда start"""
-    user = update.effective_user
-    telegram_id = user.id
+    telegram_id = update.effective_user.id
+    user_id_str = str(telegram_id)
     
-    existing_user = db.get_user(telegram_id)
+    # Устанавливаем начальное состояние
+    set_user_state(user_id_str, UserState.REGISTERING_NAME)
     
-    if existing_user:
-        await enhanced_main_menu(update, context, existing_user['name'])
-    else:
-        await update.message.reply_text(
+    print(f"DEBUG: Starting registration for user {user_id_str}")
+    
+    # Отправляем приветственное сообщение
+    await update.message.reply_text(
             "📚 Добро пожаловать в Книжный клуб с ИИ-тестированием!\n\n"
             "Я помогу вам:\n"
             "• 📚 Находить интересные книги\n"
