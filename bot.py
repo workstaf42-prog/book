@@ -139,8 +139,8 @@ async def show_testing_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await update.message.reply_text(testing_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
-    async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        try:
+   async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    try:
         message_text = update.message.text
         telegram_id = update.effective_user.id
         state = get_user_state(str(telegram_id))  # Убедитесь, что передаем строку
