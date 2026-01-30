@@ -363,30 +363,16 @@ def main():
 async def debug_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Отладочная команда для проверки"""
     user = update.effective_user
-    
-    debug_info = (
-        f"👤 **Отладочная информация:**\n\n"
-        f"🆔 ID пользователя: `{user.id}`\n"
-        f"👤 Имя: {user.first_name}\n"
-        f"📛 Username: @{user.username or 'нет'}\n"
-        f"🔗 Ссылка: tg://user?id={user.id}\n\n"
-        f"⚙️ **Проверка админ-прав:**\n"
-    )
-    
-    # Проверяем, является ли пользователь администратором
-    try:
-        from admin_panel import AdminPanel
-        admin_panel = AdminPanel()
-        is_admin = admin_panel.is_admin(user.id)
-        debug_info += f"✅ Администратор: {'ДА' if is_admin else 'НЕТ'}\n"
-        debug_info += f"📋 ID админов в коде: {admin_panel.admin_ids}\n"
-    except Exception as e:
-        debug_info += f"❌ Ошибка при проверке: {e}\n"
-    
-    await update.message.reply_text(debug_info, parse_mode=ParseMode.MARKDOWN)
+    await update.message.reply_text(f"Ваш ID: {user.id}")
 
-# В main() добавьте:
-application.add_handler(CommandHandler("debug", debug_command))
+def main():
+    # ... существующий код ...
 
-if __name__ == '__main__':
-    main()
+    application = Application.builder().token(token).build()
+
+    # Регистрируем команды
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("debug", debug_command))  # <-- Добавить эту строку
+
+    # ... остальной код ...
