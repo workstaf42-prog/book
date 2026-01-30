@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional
 
 # Класс состояния пользователя
 # Класс состояния пользователя
+# Полная версия UserState
 class UserState(Enum):
     START = "start"
     MAIN_MENU = "main_menu"
@@ -14,9 +15,9 @@ class UserState(Enum):
     REG_NAME = "reg_name"
     REG_GENRES = "reg_genres"
     REG_GOALS = "reg_goals"
-    REGISTERING_NAME = "registering_name"  # ← ДОБАВИТЬ эту строку
-    REGISTERING_GENRES = "registering_genres"  # ← ДОБАВИТЬ если нужно
-    REGISTERING_GOALS = "registering_goals"  # ← ДОБАВИТЬ если нужно
+    REGISTERING_NAME = "registering_name"
+    REGISTERING_GENRES = "registering_genres"
+    REGISTERING_GOALS = "registering_goals"
     SCHEDULE = "schedule"
     CURRENT_BOOK = "current_book"
     VOTING = "voting"
@@ -28,6 +29,13 @@ class UserState(Enum):
     ABOUT = "about"
     NOTE_ADDING = "note_adding"
     BOOK_SUGGESTION = "book_suggestion"
+    # Дополнительные состояния, которые могут быть в коде
+    WAITING_FOR_NAME = "waiting_for_name"
+    WAITING_FOR_GENRES = "waiting_for_genres"
+    WAITING_FOR_GOALS = "waiting_for_goals"
+    HELP = "help"
+    SETTINGS = "settings"
+    PROFILE = "profile"
 
 # Глобальные переменные для хранения состояния (упрощённо)
 _user_states: Dict[str, UserState] = {}
