@@ -25,7 +25,7 @@ async def run_bot_with_scheduler():
     """Запуск бота вместе с планировщиком уведомлений"""
     
     # Получаем токен бота
-    bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+    bot_token = os.getenv("@AI_book_club_bot")
     if not bot_token:
         logger.error("TELEGRAM_BOT_TOKEN не найден в переменных окружения!")
         return
