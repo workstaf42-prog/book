@@ -181,42 +181,97 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
     message_text = update.message.text
     state = get_user_state(telegram_id)
     
-    print(f"DEBUG: Handling message from {telegram_id}, state: {state}, text: {message_text}")
+    # Получаем строковое представление состояния для удобства
+    if hasattr(state, 'value'):
+        state_str = state.value
+    else:
+        state_str = str(state)
+    
+    print(f"DEBUG: Handling message from {telegram_id}, state: {state_str}, text: {message_text}")
     
     # Обработка состояний регистрации
-    if state == UserState.REGISTERING_NAME:
-        # Убираем await для синхронных функций
+    if state_str in ["registering_name", "reg_name"]:
         handle_registration_name(update, context, message_text)
-    elif state == UserState.REGISTERING_GENRES:
-        # Убираем await для синхронных функций
+        
+        # Проверяем, перешел ли пользователь к выбору жанров
+        new_state = get_user_state(telegram_id)
+        new_state_str = new_state.value if hasattr(new_state, 'value') else str(new_state)
+        
+        if new_state_str in ["reg_genres", "registering_genres"]:
+            await update.message.reply_text(
+                "📚 **ШАГ 2/3: Ваши любимые жанры**\n\n"
+                "Расскажите, какие жанры книг вам нравятся?\n\n"
+                "Примеры жанров:\n"
+                "• Фантастика\n"
+                "• Детектив\n"
+                "• Саморазвитие\n"
+                "• Научная литература\n"
+                "• Биография\n"
+                "• Классика\n"
+                "• Современная проза\n"
+                "• Ужасы\n"
+                "• Роман\n"
+                "• Поэзия\n\n"
+                "Перечислите через запятую:"
+            )
+            
+    elif state_str in ["reg_genres", "registering_genres"]:
         handle_registration_genres(update, context, message_text)
-    elif state == UserState.REGISTERING_GOALS:
-        # Убираем await для синхронных функций
+        
+        # Проверяем, перешел ли пользователь к выбору целей
+        new_state = get_user_state(telegram_id)
+        new_state_str = new_state.value if hasattr(new_state, 'value') else str(new_state)
+        
+        if new_state_str in ["reg_goals", "registering_goals"]:
+            await update.message.reply_text(
+                "🎯 **ШАГ 3/3: Ваши цели**\n\n"
+                "Зачем вы присоединяетесь к книжному клубу?\n\n"
+                "Примеры целей:\n"
+                "• Находить интересные книги\n"
+                "• Глубже понимать прочитанное\n"
+                "• Обсуждать книги с единомышленниками\n"
+                "• Регулярно читать\n"
+                "• Расширять кругозор\n"
+                "• Улучшать навыки чтения\n"
+                "• Получать рекомендации\n"
+                "• Участвовать в обсуждениях\n"
+                "• Отслеживать прогресс\n"
+                "• Найти мотивацию для чтения\n\n"
+                "Опишите ваши цели:"
+            )
+            
+    elif state_str in ["reg_goals", "registering_goals"]:
         handle_registration_goals(update, context, message_text)
         
-        # ✅ ДОБАВЬТЕ ЭТУ СТРОКУ: показываем главное меню после успешной регистрации
+        # После завершения регистрации
         user_data = db.get_user(telegram_id)
-        if user_data:
-            await enhanced_main_menu(update, context, user_data['name'])
-        else:
-            await enhanced_main_menu(update, context, user.first_name)
+        welcome_name = user_data['name'] if user_data else user.first_name
+        
+        await update.message.reply_text(
+            f"🎉 **Регистрация завершена!**\n\n"
+            f"Добро пожаловать в книжный клуб, {welcome_name}! ✨\n\n"
+            f"Теперь вы можете:\n"
+            f"• 📚 Получать книжные рекомендации\n"
+            f"• 🧪 Проходить ИИ-тесты после чтения\n"
+            f"• 🤝 Обсуждать книги с сообществом\n"
+            f"• 🎯 Отслеживать свой прогресс\n\n"
+            f"Используйте меню ниже, чтобы начать:"
+        )
+        
+        await enhanced_main_menu(update, context, welcome_name)
             
-    elif state == UserState.SUGGESTING_BOOK:
-        # Проверяем, асинхронная ли эта функция
-        result = handle_book_suggestion(update, context, message_text)
-        if hasattr(result, '__await__'):
-            await result
-    elif state == UserState.ADDING_NOTE:
-        # Проверяем, асинхронная ли эта функция
-        result = handle_note_adding(update, context, message_text)
-        if hasattr(result, '__await__'):
-            await result
-    elif state == UserState.NORMAL:
+    elif state_str in ["suggesting_book", "suggest_book"]:
+        handle_book_suggestion(update, context, message_text)
+    elif state_str in ["adding_note", "add_note"]:
+        handle_note_adding(update, context, message_text)
+    elif state_str in ["normal", "main_menu", "menu"]:
         await handle_enhanced_menu_navigation(update, context, message_text)
     else:
-        # Обработка неожиданного состояния
-        await update.message.reply_text("Пожалуйста, начните с команды /start")
-        set_user_state(telegram_id, UserState.START)
+        # Неизвестное состояние - предлагаем начать заново
+        await update.message.reply_text(
+            "📚 **Добро пожаловать в Книжный клуб!**\n\n"
+            "Используйте команду /start для регистрации."
+        )
 
 async def handle_enhanced_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка колбэков для финальной версии"""
