@@ -9,14 +9,10 @@ from telegram.constants import ParseMode
 from database import Database
 from database_extended import DatabaseExtended
 from testing_system import TestingSystem
-from ai_service_enhanced import EnhancedAIService
-
 class TestIntegration:
     def __init__(self):
-        self.db = Database()
-        self.db_ext = DatabaseExtended()
-        self.testing_system = TestingSystem()
-        self.ai_service = EnhancedAIService()
+        self.ai_service = None
+        print("⚠️ AI-сервис отключен для запуска без ключа")
     
     async def start_test_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Команда для начала тестирования по текущей книге"""
