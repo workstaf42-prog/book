@@ -42,7 +42,7 @@ from enhanced_bot import (
     handle_registration_name, handle_registration_genres, handle_registration_goals,
     handle_book_suggestion, handle_note_adding, handle_voting_callback,
     generate_ai_questions, help_command, get_main_menu, get_user_state, set_user_state,
-    UserState
+    UserState  # UserState уже импортирован из enhanced_bot
 )
 
 async def enhanced_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE, user_name: str = None):
@@ -163,39 +163,6 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
             await enhanced_main_menu(update, context, user_data['name'])
         else:
             await enhanced_main_menu(update, context, user.first_name)
-
-    from enum import Enum
-
-class UserState(Enum):
-    # Базовые состояния
-    START = "start"
-    NORMAL = "normal"
-    
-    # Состояния регистрации/профиля
-    REGISTERING_NAME = "registering_name"
-    REGISTERING_GENRES = "registering_genres"
-    REGISTERING_GOALS = "registering_goals"
-    EDITING_PROFILE = "editing_profile"
-    
-    # Состояния работы с книгами
-    SUGGESTING_BOOK = "suggesting_book"
-    WAITING_FOR_RECOMMENDATION = "waiting_for_recommendation"
-    BROWSE_BOOKS = "browse_books"
-    BOOK_DETAILS = "book_details"
-    
-    # Состояния чтения
-    ADDING_NOTE = "adding_note"
-    TRACKING_PROGRESS = "tracking_progress"
-    ADDING_REVIEW = "adding_review"
-    
-    # Состояния обсуждения
-    JOINING_DISCUSSION = "joining_discussion"
-    IN_DISCUSSION = "in_discussion"
-    
-    # Состояния клуба
-    CREATING_CLUB = "creating_club"
-    JOINING_CLUB = "joining_club"
-    CLUB_MENU = "club_menu"
             
     elif state == UserState.SUGGESTING_BOOK:
         await handle_book_suggestion(update, context, message_text)
@@ -203,6 +170,10 @@ class UserState(Enum):
         await handle_note_adding(update, context, message_text)
     elif state == UserState.NORMAL:
         await handle_enhanced_menu_navigation(update, context, message_text)
+    else:
+        # Обработка неожиданного состояния
+        await update.message.reply_text("Пожалуйста, начните с команды /start")
+        set_user_state(telegram_id, UserState.START)
 
 async def handle_enhanced_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка колбэков для финальной версии"""
