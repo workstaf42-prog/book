@@ -6,8 +6,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class AIService:
-    def __init__(self):
-        self.client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+   def __init__(self):
+       api_key = os.getenv("OPENAI_API_KEY")
+       if api_key:
+           self.client = openai.OpenAI(api_key=api_key)
+       else:
+           self.client = None
     
     def recommend_books(self, user_preferences: Dict[str, Any]) -> List[str]:
         """
