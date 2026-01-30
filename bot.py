@@ -140,11 +140,81 @@ async def show_testing_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(testing_text, reply_markup=reply_markup, parse_mode=ParseMode.MARKDOWN)
 
 async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Обработка сообщений для финальной версии"""
-    user = update.effective_user
-    telegram_id = user.id
-    message_text = update.message.text
-    state = get_user_state(telegram_id)
+    try:
+        message_text = update.message.text
+        telegram_id = update.effective_user.id
+        state = get_user_state(str(telegram_id))  # Убедитесь, что передаем строку
+        
+        print(f"DEBUG: Handling message from {telegram_id}, state: {state}, text: {message_text}")
+        
+        if state == UserState.REGISTERING_NAME:
+            # Обработка имени
+            result = handle_registration_name(update, context, message_text)
+            if result and 'message' in result:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=result['message']
+                )
+            else:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="Что-то пошло не так. Пожалуйста, введите ваше имя еще раз."
+                )
+            return
+        
+        elif state == UserState.REG_GENRES:
+            # Обработка жанров - пользователь вводит жанры через запятую
+            print(f"DEBUG: Processing genres for user {telegram_id}")
+            genres = [g.strip() for g in message_text.split(',')]
+            result = handle_registration_genres(update, context, genres)
+            if result and 'message' in result:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=result['message']
+                )
+            else:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="Пожалуйста, введите жанры через запятую, например: Фантастика, Детектив, Роман"
+                )
+            return
+        
+        elif state == UserState.REG_GOALS:
+            # Обработка целей
+            goals = [g.strip() for g in message_text.split(',')]
+            result = handle_registration_goals(update, context, goals)
+            if result and 'message' in result:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text=result['message']
+                )
+            else:
+                await context.bot.send_message(
+                    chat_id=update.effective_chat.id,
+                    text="Пожалуйста, введите цели через запятую"
+                )
+            return
+        
+        # Если состояние не соответствует вышеуказанным, обрабатываем как обычное сообщение
+        result = handle_message(str(telegram_id), message_text)
+        if result and 'response' in result:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text=result['response']
+            )
+            
+    except Exception as e:
+        print(f"ERROR in handle_enhanced_message: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        try:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id,
+                text="Произошла ошибка при обработке сообщения. Попробуйте еще раз."
+            )
+        except:
+            pass
     
     # Обработка состояний регистрации
     if state == UserState.REGISTERING_NAME:
