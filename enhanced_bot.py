@@ -201,30 +201,78 @@ def show_about(user_id: str):
     }
 
 # Функции регистрации
-def handle_registration_name(user_id: str, name: str):
-    """Обработка имени при регистрации"""
+def handle_registration_name(*args):
+    """Обработка имени при регистрации (универсальная версия)"""
+    # Определяем, сколько аргументов передано
+    if len(args) == 2:
+        # Версия из enhanced_bot.py: (user_id, name)
+        user_id, name = args[0], args[1]
+    elif len(args) == 3:
+        # Версия из bot.py: (update, context, name)
+        update, context, name = args[0], args[1], args[2]
+        try:
+            user_id = str(update.effective_user.id)
+        except AttributeError:
+            user_id = "unknown_user"
+    else:
+        return {
+            "success": False,
+            "message": "Некорректные аргументы"
+        }
+    
+    print(f"Stub: Registration name for user {user_id}: {name}")
+    
     _user_data.setdefault(user_id, {})["name"] = name
     set_user_state(user_id, UserState.REG_GENRES)
+    
     return {
         "success": True,
         "next_step": "genres",
         "message": f"Отлично, {name}! Теперь выберите любимые жанры."
     }
 
-def handle_registration_genres(user_id: str, genres: List[str]):
-    """Обработка выбора жанров"""
+def handle_registration_genres(*args):
+    """Обработка выбора жанров (универсальная версия)"""
+    if len(args) == 2:
+        user_id, genres = args[0], args[1]
+    elif len(args) == 3:
+        update, context, genres = args[0], args[1], args[2]
+        try:
+            user_id = str(update.effective_user.id)
+        except AttributeError:
+            user_id = "unknown_user"
+    else:
+        return {"success": False, "message": "Некорректные аргументы"}
+    
+    print(f"Stub: Registration genres for user {user_id}: {genres}")
+    
     _user_data.setdefault(user_id, {})["genres"] = genres
     set_user_state(user_id, UserState.REG_GOALS)
+    
     return {
         "success": True,
         "next_step": "goals",
         "message": f"Выбрано жанров: {len(genres)}. Теперь укажите цели чтения."
     }
 
-def handle_registration_goals(user_id: str, goals: List[str]):
-    """Обработка целей чтения"""
+def handle_registration_goals(*args):
+    """Обработка целей чтения (универсальная версия)"""
+    if len(args) == 2:
+        user_id, goals = args[0], args[1]
+    elif len(args) == 3:
+        update, context, goals = args[0], args[1], args[2]
+        try:
+            user_id = str(update.effective_user.id)
+        except AttributeError:
+            user_id = "unknown_user"
+    else:
+        return {"success": False, "message": "Некорректные аргументы"}
+    
+    print(f"Stub: Registration goals for user {user_id}: {goals}")
+    
     _user_data.setdefault(user_id, {})["goals"] = goals
     set_user_state(user_id, UserState.MAIN_MENU)
+    
     return {
         "success": True,
         "completed": True,
