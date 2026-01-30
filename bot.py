@@ -179,139 +179,8 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
     user = update.effective_user
     telegram_id = user.id
     message_text = update.message.text
-
+    
     print(f"DEBUG: Handling message from {telegram_id}, text: {message_text}")
-
-    # Проверяем, если это команда /start
-    if message_text == "/start":
-        await enhanced_start(update, context)
-        return
-
-    # Получаем состояние пользователя
-    state = get_user_state(telegram_id)
-
-    # Если состояние None, начинаем регистрацию заново
-    if state is None:
-        await enhanced_start(update, context)
-        return
-
-    # Преобразуем состояние в строку для удобства
-    state_str = str(state)
-    if hasattr(state, 'value'):
-        state_str = state.value
-
-    print(f"DEBUG: State string: {state_str}")
-
-    # Простая логика регистрации без вызовов функций из enhanced_bot
-    if "name" in state_str.lower() or "reg_name" in state_str:
-        # Шаг 1: Сохраняем имя
-        print(f"DEBUG: Saving name: {message_text}")
-
-        # Сохраняем пользователя в базу данных
-        try:
-            db.add_user(
-                telegram_id=telegram_id,
-                name=message_text,
-                genres="",
-                goals="",
-                username=user.username or "",
-                registration_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            )
-            print(f"DEBUG: User {telegram_id} added to database")
-        except Exception as e:
-            print(f"DEBUG: Error adding user: {e}")
-            # Если пользователь уже существует, обновляем имя
-            db.update_user(telegram_id, name=message_text)
-
-        # Устанавливаем состояние для следующего шага
-        set_user_state(telegram_id, "waiting_for_genres")
-
-        # Запрашиваем жанры
-        await update.message.reply_text(
-            "📚 **ШАГ 2/3: Ваши любимые жанры**\n\n"
-            "Расскажите, какие жанры книг вам нравятся?\n\n"
-            "Примеры жанров:\n"
-            "• Фантастика\n"
-            "• Детектив\n"
-            "• Саморазвитие\n"
-            "• Научная литература\n"
-            "• Биография\n"
-            "• Классика\n"
-            "• Современная проза\n"
-            "• Ужасы\n"
-            "• Роман\n"
-            "• Поэзия\n\n"
-            "Перечислите через запятую:"
-        )
-
-    elif "genre" in state_str.lower() or "genres" in state_str:
-        # Шаг 2: Сохраняем жанры
-        print(f"DEBUG: Saving genres: {message_text}")
-
-        # Обновляем жанры в базе данных
-        db.update_user(telegram_id, genres=message_text)
-
-        # Устанавливаем состояние для следующего шага
-        set_user_state(telegram_id, "waiting_for_goals")
-
-        # Запрашиваем цели
-        await update.message.reply_text(
-            "🎯 **ШАГ 3/3: Ваши цели**\n\n"
-            "Зачем вы присоединяетесь к книжному клубе?\n\n"
-            "Примеры целей:\n"
-            "• Находить интересные книги\n"
-            "• Глубже понимать прочитанное\n"
-            "• Обсуждать книги с единомышленниками\n"
-            "• Регулярно читать\n"
-            "• Расширять кругозор\n"
-            "• Улучшать навыки чтения\n"
-            "• Получать рекомендации\n"
-            "• Участвовать в обсуждениях\n"
-            "• Отслеживать прогресс\n"
-            "• Найти мотивацию для чтения\n\n"
-            "Опишите ваши цели:"
-        )
-
-    elif "goal" in state_str.lower() or "goals" in state_str:
-        # Шаг 3: Сохраняем цели и завершаем регистрацию
-        print(f"DEBUG: Saving goals: {message_text}")
-
-        # Обновляем цели в базе данных
-        db.update_user(telegram_id, goals=message_text)
-
-        # Устанавливаем состояние "normal" (зарегистрирован)
-        set_user_state(telegram_id, "normal")
-
-        # Получаем данные пользователя для приветствия
-        user_data = db.get_user(telegram_id)
-        welcome_name = user_data['name'] if user_data else user.first_name
-
-        # Приветствуем пользователя
-        await update.message.reply_text(
-            f"🎉 **Регистрация завершена!**\n\n"
-            f"Добро пожаловать в книжный клуб, {welcome_name}! ✨\n\n"
-            f"Теперь вы можете:\n"
-            f"• 📚 Получать книжные рекомендации\n"
-            f"• 🧪 Проходить ИИ-тесты после чтения\n"
-            f"• 🤝 Обсуждать книги с сообществом\n"
-            f"• 🎯 Отслеживать свой прогресс\n\n"
-            f"Используйте меню ниже, чтобы начать:"
-        )
-
-        # Показываем главное меню
-        await enhanced_main_menu(update, context, welcome_name)
-
-    elif state_str == "normal":
-        # Пользователь зарегистрирован - обрабатываем навигацию по меню
-        await handle_enhanced_menu_navigation(update, context, message_text)
-
-    else:
-        # Неизвестное состояние - начинаем заново
-        await update.message.reply_text(
-            "📚 **Добро пожаловать в Книжный клуб!**\n\n"
-            "Используйте команду /start для регистрации."
-        )
-        set_user_state(telegram_id, "start")
     
     # Проверяем, если это команда /start
     if message_text == "/start":
@@ -333,14 +202,15 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
     
     print(f"DEBUG: State string: {state_str}")
     
-    # Простая логика регистрации без вызовов функций из enhanced_bot
+    # Простая логика регистрации
     if "name" in state_str.lower() or "reg_name" in state_str:
         # Шаг 1: Сохраняем имя
         print(f"DEBUG: Saving name: {message_text}")
         
-        # Сохраняем пользователя в базу данных
+        # Пробуем разные методы для сохранения пользователя
         try:
-            db.add_user(
+            # Пробуем метод create_user (если он существует)
+            db.create_user(
                 telegram_id=telegram_id,
                 name=message_text,
                 genres="",
@@ -348,11 +218,31 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
                 username=user.username or "",
                 registration_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
-            print(f"DEBUG: User {telegram_id} added to database")
-        except Exception as e:
-            print(f"DEBUG: Error adding user: {e}")
-            # Если пользователь уже существует, обновляем имя
-            db.update_user(telegram_id, name=message_text)
+            print(f"DEBUG: User {telegram_id} created in database")
+        except AttributeError:
+            # Если нет create_user, пробуем другой метод
+            print(f"DEBUG: create_user not found, trying other methods")
+            try:
+                # Пробуем add_user
+                db.add_user(
+                    telegram_id=telegram_id,
+                    name=message_text,
+                    genres="",
+                    goals="",
+                    username=user.username or "",
+                    registration_date=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                )
+                print(f"DEBUG: User {telegram_id} added to database")
+            except Exception as e:
+                print(f"DEBUG: Error adding user: {e}")
+                # Если не удалось сохранить в БД, сохраняем в контекст
+                if 'user_data' not in context.user_data:
+                    context.user_data['user_data'] = {}
+                context.user_data['user_data'][telegram_id] = {
+                    'name': message_text,
+                    'genres': '',
+                    'goals': ''
+                }
         
         # Устанавливаем состояние для следующего шага
         set_user_state(telegram_id, "waiting_for_genres")
@@ -379,8 +269,19 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
         # Шаг 2: Сохраняем жанры
         print(f"DEBUG: Saving genres: {message_text}")
         
-        # Обновляем жанры в базе данных
-        db.update_user(telegram_id, genres=message_text)
+        # Пробуем обновить жанры в базе данных
+        try:
+            # Пробуем update_user
+            db.update_user(telegram_id, genres=message_text)
+            print(f"DEBUG: User {telegram_id} genres updated in database")
+        except AttributeError:
+            # Если нет update_user, пробуем другой способ
+            print(f"DEBUG: update_user not found, using context")
+            if 'user_data' not in context.user_data:
+                context.user_data['user_data'] = {}
+            if telegram_id not in context.user_data['user_data']:
+                context.user_data['user_data'][telegram_id] = {}
+            context.user_data['user_data'][telegram_id]['genres'] = message_text
         
         # Устанавливаем состояние для следующего шага
         set_user_state(telegram_id, "waiting_for_goals")
@@ -407,15 +308,35 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
         # Шаг 3: Сохраняем цели и завершаем регистрацию
         print(f"DEBUG: Saving goals: {message_text}")
         
-        # Обновляем цели в базе данных
-        db.update_user(telegram_id, goals=message_text)
+        # Пробуем обновить цели в базе данных
+        try:
+            # Пробуем update_user
+            db.update_user(telegram_id, goals=message_text)
+            print(f"DEBUG: User {telegram_id} goals updated in database")
+        except AttributeError:
+            # Если нет update_user, пробуем другой способ
+            print(f"DEBUG: update_user not found, using context")
+            if 'user_data' not in context.user_data:
+                context.user_data['user_data'] = {}
+            if telegram_id not in context.user_data['user_data']:
+                context.user_data['user_data'][telegram_id] = {}
+            context.user_data['user_data'][telegram_id]['goals'] = message_text
         
         # Устанавливаем состояние "normal" (зарегистрирован)
         set_user_state(telegram_id, "normal")
         
         # Получаем данные пользователя для приветствия
-        user_data = db.get_user(telegram_id)
-        welcome_name = user_data['name'] if user_data else user.first_name
+        try:
+            user_data = db.get_user(telegram_id)
+            welcome_name = user_data['name'] if user_data else user.first_name
+        except:
+            # Если не удалось получить из БД, пробуем из контекста
+            if ('user_data' in context.user_data and 
+                telegram_id in context.user_data['user_data'] and
+                'name' in context.user_data['user_data'][telegram_id]):
+                welcome_name = context.user_data['user_data'][telegram_id]['name']
+            else:
+                welcome_name = user.first_name
         
         # Приветствуем пользователя
         await update.message.reply_text(
