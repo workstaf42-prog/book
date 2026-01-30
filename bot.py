@@ -148,17 +148,17 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
     
     # Обработка состояний регистрации
     if state == UserState.REGISTERING_NAME:
-        await handle_registration_name(update, context, message_text)
+        result = handle_registration_name(update, context, message_text)
     elif state == UserState.REGISTERING_GENRES:
-        await handle_registration_genres(update, context, message_text)
+        result = handle_registration_genres(update, context, message_text)
     elif state == UserState.REGISTERING_GOALS:
-        await handle_registration_goals(update, context, message_text)
+        result = handle_registration_goals(update, context, message_text)
     elif state == UserState.SUGGESTING_BOOK:
-        await handle_book_suggestion(update, context, message_text)
+        result = handle_book_suggestion(update, context, message_text)
     elif state == UserState.ADDING_NOTE:
-        await handle_note_adding(update, context, message_text)
+        result = handle_note_adding(update, context, message_text)
     elif state == UserState.NORMAL:
-        await handle_enhanced_menu_navigation(update, context, message_text)
+        result = handle_enhanced_menu_navigation(update, context, message_text)
 
 async def handle_enhanced_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка колбэков для финальной версии"""
