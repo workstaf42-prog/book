@@ -150,12 +150,14 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
     
     # Обработка состояний регистрации
     if state == UserState.REGISTERING_NAME:
-        await handle_registration_name(update, context, message_text)
+        # Убираем await для синхронных функций
+        handle_registration_name(update, context, message_text)
     elif state == UserState.REGISTERING_GENRES:
-        await handle_registration_genres(update, context, message_text)
+        # Убираем await для синхронных функций
+        handle_registration_genres(update, context, message_text)
     elif state == UserState.REGISTERING_GOALS:
-        # Здесь происходит регистрация и ПОСЛЕ НЕЕ НУЖНО ПОКАЗАТЬ МЕНЮ!
-        await handle_registration_goals(update, context, message_text)
+        # Убираем await для синхронных функций
+        handle_registration_goals(update, context, message_text)
         
         # ✅ ДОБАВЬТЕ ЭТУ СТРОКУ: показываем главное меню после успешной регистрации
         user_data = db.get_user(telegram_id)
@@ -165,9 +167,15 @@ async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_
             await enhanced_main_menu(update, context, user.first_name)
             
     elif state == UserState.SUGGESTING_BOOK:
-        await handle_book_suggestion(update, context, message_text)
+        # Проверяем, асинхронная ли эта функция
+        result = handle_book_suggestion(update, context, message_text)
+        if hasattr(result, '__await__'):
+            await result
     elif state == UserState.ADDING_NOTE:
-        await handle_note_adding(update, context, message_text)
+        # Проверяем, асинхронная ли эта функция
+        result = handle_note_adding(update, context, message_text)
+        if hasattr(result, '__await__'):
+            await result
     elif state == UserState.NORMAL:
         await handle_enhanced_menu_navigation(update, context, message_text)
     else:
