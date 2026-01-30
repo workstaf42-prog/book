@@ -26,9 +26,9 @@ class TestIntegration:
         try:
             self.ai_service = EnhancedAIService()
             if not self.ai_service.is_available():
-                print("⚠️ AI-сервис недоступен, приложение работает в ограниченном режиме")
+                print("⚠️ AI service not available, running in limited mode")
         except Exception as e:
-            print(f"⚠️ Не удалось инициализировать AI-сервис: {e}")
+            print(f"⚠️ Failed to initialize AI service: {e}")
             self.ai_service = None
     
     # Пример метода, который использует AI-сервис
