@@ -448,16 +448,18 @@ async def enhanced_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Если пользователь уже зарегистрирован - показываем главное меню
         await enhanced_main_menu(update, context, existing_user['name'])
     else:
+        # Начинаем регистрацию
         await update.message.reply_text(
-            "📚 Добро пожаловать в Книжный клуб с ИИ-тестированием!\n\n"
+            "📚 **Добро пожаловать в Книжный клуб с ИИ-тестированием!**\n\n"
             "Я помогу вам:\n"
             "• 📚 Находить интересные книги\n"
             "• 🧠 Глубоко понимать прочитанное\n"
             "• 🧪 Проходить ИИ-тесты после каждой книги\n"
             "• 🤝 Находить единомышленников\n\n"
-            "Давайте начнем с регистрации. Как вас зовут?"
+            "Давайте начнем с регистрации!\n\n"
+            "**ШАГ 1/3: Как вас зовут?**"
         )
-        set_user_state(telegram_id, UserState.REGISTERING_NAME)
+        set_user_state(telegram_id, "waiting_for_name")
 
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда для принудительного показа меню"""
