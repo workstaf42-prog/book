@@ -174,7 +174,7 @@ except AttributeError:
     UserState = UserStateExtended
     print(f"DEBUG: Extended UserState with new states: {[s.name for s in UserState]}")
 
-  async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def handle_enhanced_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Обработка сообщений для финальной версии"""
     user = update.effective_user
     telegram_id = user.id
