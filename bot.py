@@ -372,8 +372,7 @@ def main():
 
     def main():
     """Основная функция запуска бота"""
-    # Здесь должна быть строка получения токена
-    token = os.getenv("TELEGRAM_BOT_TOKEN")  # ← ЭТОЙ СТРОКИ НЕТ ИЛИ ОНА НЕ РАБОТАЕТ
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
     
     application = Application.builder().token(token).build()  # ← строка 371
 
