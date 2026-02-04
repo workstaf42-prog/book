@@ -69,7 +69,6 @@ class AdminPanel:
             "🛠️ **Админ-панель Книжного клуба**\n\n"
             "Выберите действие:",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.MARKDOWN
         )
     
     async def handle_admin_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -111,7 +110,7 @@ class AdminPanel:
                 f"📅 Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
             )
             
-            await update.message.reply_text(stats_text, parse_mode=ParseMode.MARKDOWN)
+            await update.message.reply_text(stats_text)
         
         except Exception as e:
             await update.message.reply_text(f"❌ Ошибка при получении статистики: {e}")
@@ -151,7 +150,6 @@ class AdminPanel:
             "🗳️ **Выберите книги для голосования**\n\n"
             "Отметьте книги, которые будут участвовать в голосовании:",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.MARKDOWN
         )
     
     async def schedule_meeting(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -183,7 +181,7 @@ class AdminPanel:
                 f"📚 {user['favorite_genres']}\n\n"
             )
         
-        await update.message.reply_text(users_text, parse_mode=ParseMode.MARKDOWN)
+        await update.message.reply_text
     
     async def start_broadcast(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Начать рассылку"""
