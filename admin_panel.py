@@ -55,26 +55,47 @@ class AdminPanel:
         )
     
     async def handle_admin_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Обработка сообщений в админ-панели"""
-        if not self.is_admin(update.effective_user.id):
-            return
-        
-        message_text = update.message.text
-        
-        if message_text == "📊 Статистика":
-            await self.show_statistics(update, context)
-        elif message_text == "📚 Добавить книгу":
-            await self.start_add_book(update, context)
-        elif message_text == "🗳️ Создать голосование":
-            await self.create_voting(update, context)
-        elif message_text == "📅 Запланировать встречу":
-            await self.schedule_meeting(update, context)
-        elif message_text == "👥 Управление пользователями":
-            await self.manage_users(update, context)
-        elif message_text == "📝 Рассылка":
-            await self.start_broadcast(update, context)
-        elif message_text == "🔙 Выйти из админ-панели":
-            await self.exit_admin_panel(update, context)
+    """Обработка сообщений в админ-панели"""
+    if not self.is_admin(update.effective_user.id):
+        return
+    
+    # Инициализируем user_data если его нет
+    if not hasattr(context, 'user_data') or context.user_data is None:
+        context.user_data = {}
+    
+    message_text = update.message.text
+    
+    if message_text == "📊 Статистика":
+        await self.show_statistics(update, context)
+    elif message_text == "📚 Добавить книгу":
+        await self.start_add_book(update, context)
+    elif message_text == "🗳️ Создать голосование":
+        await self.create_voting(update, context)
+    elif message_text == "📅 Запланировать встречу":
+        await self.schedule_meeting(update, context)
+    elif message_text == "👥 Управление пользователями":
+        await self.manage_users(update, context)
+    elif message_text == "📝 Рассылка":
+        await self.start_broadcast(update, context)
+    elif message_text == "🔙 Выйти из админ-панели":
+        await self.exit_admin_panel(update, context)
+
+async def handle_admin_callback(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Обработка колбэков в админ-панели"""
+    query = update.callback_query
+    await query.answer()
+    
+    if not self.is_admin(update.effective_user.id):
+        return
+    
+    data = query.data
+    
+    if data.startswith("admin_select_book_"):
+        book_id = int(data.split("_")[3])
+        # Здесь можно добавить логику выбора книг для голосования
+        await query.edit_message_text(
+            f"✅ Книга с ID {book_id} добавлена в голосование"
+        )
     
     async def show_statistics(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Показать статистику клуба"""
