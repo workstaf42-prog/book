@@ -25,7 +25,7 @@ class AdminPanel:
         """Проверка, является ли пользователь администратором"""
         return user_id in self.admin_ids
     
-       async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+            async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Команда /admin для администраторов"""
         print(f"DEBUG: admin_start called by user {update.effective_user.id}")
         print(f"DEBUG: Admin IDs: {self.admin_ids}")
