@@ -52,7 +52,6 @@ class AdminPanel:
             "🛠️ **Админ-панель Книжного клуба**\n\n"
             "Выберите действие:",
             reply_markup=reply_markup,
-            parse_mode=ParseMode.MARKDOWN
         )
         
         keyboard = [
