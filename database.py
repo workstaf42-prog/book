@@ -251,3 +251,70 @@ class Database:
                 """, (user['id'],))
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
+
+    # Добавьте эти методы в конец класса Database
+    def get_all_users(self) -> List[Dict[str, Any]]:
+        """Получить всех пользователей"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users ORDER BY registration_date DESC")
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    def get_premium_users(self) -> List[Dict[str, Any]]:
+        """Получить премиум пользователей"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE is_premium = 1")
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    def get_meeting_reminders(self, hours_ahead: int = 24) -> List[Dict[str, Any]]:
+        """Получить встречи на ближайшие N часов"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT m.*, b.title, b.author 
+                FROM meetings m
+                JOIN books b ON m.book_id = b.id
+                WHERE m.is_active = 1 
+                AND datetime(m.meeting_date) BETWEEN datetime('now')
+                AND datetime('now', ?)
+            """, (f'+{hours_ahead} hours',))
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    def get_books_for_voting(self, limit: int = 10) -> List[Dict[str, Any]]:
+        """Получить книги для голосования"""
+        with sqlite3.connect(self.db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM books 
+                ORDER BY added_date DESC 
+                LIMIT ?
+            """, (limit,))
+            rows = cursor.fetchall()
+            return [dict(row) for row in rows]
+
+    def update_user(self, telegram_id: int, **kwargs) -> bool:
+        """Обновить данные пользователя"""
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+                set_clause = ", ".join([f"{key} = ?" for key in kwargs.keys()])
+                values = list(kwargs.values())
+                values.append(telegram_id)
+                cursor.execute(f"""
+                    UPDATE users 
+                    SET {set_clause}
+                    WHERE telegram_id = ?
+                """, values)
+                conn.commit()
+                return cursor.rowcount > 0
+        except Exception as e:
+            print(f"Error updating user: {e}")
+            return False
