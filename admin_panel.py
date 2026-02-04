@@ -20,7 +20,7 @@ class AdminPanel:
     def __init__(self):
         self.db = Database()
         self.ai_service = AIService()
-        self.admin_ids = [1075942245, 1241903045]  # Здесь нужно указать ID администраторов
+        self.admin_ids = [1075942245]  # Здесь нужно указать ID администраторов
     
     def is_admin(self, user_id: int) -> bool:
         """Проверка, является ли пользователь администратором"""
