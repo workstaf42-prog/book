@@ -28,14 +28,17 @@ class AdminPanel:
         return user_id in self.admin_ids
     
     async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        """Команда /admin для администраторов"""
-        print(f"DEBUG: admin_start called by user {update.effective_user.id}")
-        print(f"DEBUG: Admin IDs: {self.admin_ids}")
-        print(f"DEBUG: Is admin? {self.is_admin(update.effective_user.id)}")
-        
-        if not self.is_admin(update.effective_user.id):
-            await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
-            return
+    """Команда /admin для администраторов"""
+    user_id = update.effective_user.id
+    logger.info(f"Пользователь {user_id} пытается получить доступ к админ-панели")
+    logger.info(f"Admin IDs: {self.admin_ids}")
+    logger.info(f"Is admin? {self.is_admin(user_id)}")
+    
+    if not self.is_admin(user_id):
+        await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
+        return
+    
+    # ... остальной код
         
         keyboard = [
             [KeyboardButton("📊 Статистика")],
