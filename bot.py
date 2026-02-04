@@ -1,3 +1,6 @@
+# После других импортов добавьте:
+from admin_panel import AdminPanel
+
 import time
 import os
 
@@ -33,6 +36,9 @@ logger = logging.getLogger(__name__)
 
 db = Database()
 ai_service = AIService()
+
+# Создаем экземпляр админ-панели
+admin_panel = AdminPanel()
 
 # Импортируем расширенные функции
 from enhanced_bot import (
@@ -539,7 +545,10 @@ def main():
     # Основные команды
     application.add_handler(CommandHandler("start", enhanced_start))
     application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("menu", menu_command))  # ✅ Добавляем команду /menu
+    application.add_handler(CommandHandler("menu", menu_command))
+    
+    # ✅ ДОБАВЛЕНО: Команда /admin для админ-панели
+    application.add_handler(CommandHandler("admin", admin_panel.admin_start))
     
     # Команды тестирования
     from test_integration import test_integration
@@ -559,11 +568,20 @@ def main():
     # Колбэки
     application.add_handler(CallbackQueryHandler(handle_enhanced_callback))
     
+    # ✅ ДОБАВЛЕНО: Колбэк для админ-панели
+    application.add_handler(CallbackQueryHandler(admin_panel.handle_admin_callback))
+    
     # Сообщения
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_enhanced_message))
     
+    # ✅ ДОБАВЛЕНО: Сообщения для админ-панели (должен быть ПОСЛЕ основного обработчика)
+    # Фильтруем только сообщения от админов, чтобы не мешать основному боту
+    application.add_handler(
+        MessageHandler(
+            filters.TEXT & ~filters.COMMAND, 
+            admin_panel.handle_admin_message
+        )
+    )
+    
     logger.info("Запуск финальной версии Книжного клуба с ИИ-тестированием...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
-
-if __name__ == '__main__':
-    main()
