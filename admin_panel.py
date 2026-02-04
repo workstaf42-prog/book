@@ -1,8 +1,5 @@
 import sqlite3
-
 import logging
-logging.basicConfig(level=logging.DEBUG)
-
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
@@ -15,27 +12,29 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Включаем логирование для отладки
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
 class AdminPanel:
     def __init__(self):
         self.db = Database()
         self.ai_service = AIService()
-        self.admin_ids = [1075942245,1241903045]  # Здесь нужно указать ID администраторов
+        self.admin_ids = [1075942245, 1241903045]  # Здесь нужно указать ID администраторов
     
     def is_admin(self, user_id: int) -> bool:
         """Проверка, является ли пользователь администратором"""
         return user_id in self.admin_ids
     
-            async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+    async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Команда /admin для администраторов"""
         print(f"DEBUG: admin_start called by user {update.effective_user.id}")
         print(f"DEBUG: Admin IDs: {self.admin_ids}")
         print(f"DEBUG: Is admin? {self.is_admin(update.effective_user.id)}")
         
         if not self.is_admin(update.effective_user.id):
-                    await update.message.reply_text(
-            "Админ-панель запущена!",
-            reply_markup=reply_markup
-        )
+            await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
+            return
         
         keyboard = [
             [KeyboardButton("📊 Статистика")],
@@ -52,23 +51,7 @@ class AdminPanel:
             "🛠️ **Админ-панель Книжного клуба**\n\n"
             "Выберите действие:",
             reply_markup=reply_markup,
-        )
-        
-        keyboard = [
-            [KeyboardButton("📊 Статистика")],
-            [KeyboardButton("📚 Добавить книгу")],
-            [KeyboardButton("🗳️ Создать голосование")],
-            [KeyboardButton("📅 Запланировать встречу")],
-            [KeyboardButton("👥 Управление пользователями")],
-            [KeyboardButton("📝 Рассылка")],
-            [KeyboardButton("🔙 Выйти из админ-панели")]
-        ]
-        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
-        
-        await update.message.reply_text(
-            "🛠️ **Админ-панель Книжного клуба**\n\n"
-            "Выберите действие:",
-            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
         )
     
     async def handle_admin_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -101,19 +84,22 @@ class AdminPanel:
             premium_users = len(self.db.get_premium_users())
             active_meetings = len(self.db.get_meeting_reminders(24*7))  # На неделю вперед
             
+            # Избегаем деление на ноль
+            conversion = (premium_users / total_users * 100) if total_users > 0 else 0
+            
             stats_text = (
                 "📊 **Статистика Книжного клуба**\n\n"
                 f"👥 Всего пользователей: {total_users}\n"
                 f"💎 Премиум-пользователей: {premium_users}\n"
                 f"📅 Активных встреч: {active_meetings}\n\n"
-                f"📈 Конверсия в премиум: {(premium_users/total_users*100):.1f}%\n"
+                f"📈 Конверсия в премиум: {conversion:.1f}%\n"
                 f"📅 Дата: {datetime.now().strftime('%d.%m.%Y %H:%M')}"
             )
             
-            await update.message.reply_text(stats_text)
+            await update.message.reply_text(stats_text, parse_mode=ParseMode.MARKDOWN)
         
         except Exception as e:
-            await update.message.reply_text(f"❌ Ошибка при получении статистики: {e}")
+            await update.message.reply_text(f"❌ Ошибка при получении статистики: {str(e)}")
     
     async def start_add_book(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Начать процесс добавления книги"""
@@ -124,7 +110,8 @@ class AdminPanel:
             "Автор: [имя автора]\n"
             "Жанр: [жанр]\n"
             "Описание: [краткое описание]\n"
-            "Обложка: [URL обложки, если есть]"
+            "Обложка: [URL обложки, если есть]",
+            parse_mode=ParseMode.MARKDOWN
         )
     
     async def create_voting(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -150,6 +137,7 @@ class AdminPanel:
             "🗳️ **Выберите книги для голосования**\n\n"
             "Отметьте книги, которые будут участвовать в голосовании:",
             reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
         )
     
     async def schedule_meeting(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -160,28 +148,32 @@ class AdminPanel:
             "Книга ID: [ID книги]\n"
             "Дата: [ГГГГ-ММ-ДД ЧЧ:ММ]\n"
             "Ссылка: [URL для онлайн-встречи]\n"
-            "Место: [адрес, если офлайн]"
+            "Место: [адрес, если офлайн]",
+            parse_mode=ParseMode.MARKDOWN
         )
     
     async def manage_users(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Управление пользователями"""
-        users = self.db.get_all_users()[:10]  # Показываем первых 10 пользователей
-        
-        if not users:
-            await update.message.reply_text("😕 Пользователей пока нет")
-            return
-        
-        users_text = "👥 **Последние пользователи:**\n\n"
-        
-        for user in users:
-            status = "💎" if user['is_premium'] else "👤"
-            users_text += (
-                f"{status} {user['name']} (ID: {user['telegram_id']})\n"
-                f"📅 {user['registration_date'][:10]}\n"
-                f"📚 {user['favorite_genres']}\n\n"
-            )
-        
-        await update.message.reply_text
+        try:
+            users = self.db.get_all_users()[:10]  # Показываем первых 10 пользователей
+            
+            if not users:
+                await update.message.reply_text("😕 Пользователей пока нет")
+                return
+            
+            users_text = "👥 **Последние пользователи:**\n\n"
+            
+            for user in users:
+                status = "💎" if user.get('is_premium') else "👤"
+                users_text += (
+                    f"{status} {user.get('name', 'Без имени')} (ID: {user.get('telegram_id', 'N/A')})\n"
+                    f"📅 {user.get('registration_date', '')[:10] if user.get('registration_date') else 'N/A'}\n"
+                    f"📚 {user.get('favorite_genres', 'Не указаны')}\n\n"
+                )
+            
+            await update.message.reply_text(users_text, parse_mode=ParseMode.MARKDOWN)
+        except Exception as e:
+            await update.message.reply_text(f"❌ Ошибка при получении пользователей: {str(e)}")
     
     async def start_broadcast(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Начать рассылку"""
@@ -228,22 +220,3 @@ class AdminPanel:
             await query.edit_message_text(
                 f"✅ Книга с ID {book_id} добавлена в голосование"
             )
-
-# Дополнительные методы для Database (нужно добавить в database.py)
-"""
-def get_all_users(self) -> List[Dict[str, Any]]:
-    with sqlite3.connect(self.db_path) as conn:
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users ORDER BY registration_date DESC")
-        rows = cursor.fetchall()
-        return [dict(row) for row in rows]
-
-def get_premium_users(self) -> List[Dict[str, Any]]:
-    with sqlite3.connect(self.db_path) as conn:
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users WHERE is_premium = 1")
-        rows = cursor.fetchall()
-        return [dict(row) for row in rows]
-"""
