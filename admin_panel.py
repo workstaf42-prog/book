@@ -25,17 +25,33 @@ class AdminPanel:
         """Проверка, является ли пользователь администратором"""
         return user_id in self.admin_ids
     
-    async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Команда /admin для администраторов"""
-    print(f"DEBUG: admin_start called by user {update.effective_user.id}")
-    print(f"DEBUG: Admin IDs: {self.admin_ids}")
-    print(f"DEBUG: Is admin? {self.is_admin(update.effective_user.id)}")
-    
-    if not self.is_admin(update.effective_user.id):
-        await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
-        return
-    
-    # ... остальной код
+       async def admin_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        """Команда /admin для администраторов"""
+        print(f"DEBUG: admin_start called by user {update.effective_user.id}")
+        print(f"DEBUG: Admin IDs: {self.admin_ids}")
+        print(f"DEBUG: Is admin? {self.is_admin(update.effective_user.id)}")
+        
+        if not self.is_admin(update.effective_user.id):
+            await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
+            return
+        
+        keyboard = [
+            [KeyboardButton("📊 Статистика")],
+            [KeyboardButton("📚 Добавить книгу")],
+            [KeyboardButton("🗳️ Создать голосование")],
+            [KeyboardButton("📅 Запланировать встречу")],
+            [KeyboardButton("👥 Управление пользователями")],
+            [KeyboardButton("📝 Рассылка")],
+            [KeyboardButton("🔙 Выйти из админ-панели")]
+        ]
+        reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
+        
+        await update.message.reply_text(
+            "🛠️ **Админ-панель Книжного клуба**\n\n"
+            "Выберите действие:",
+            reply_markup=reply_markup,
+            parse_mode=ParseMode.MARKDOWN
+        )
         
         keyboard = [
             [KeyboardButton("📊 Статистика")],
