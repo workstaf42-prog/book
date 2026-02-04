@@ -1,4 +1,8 @@
 import sqlite3
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
