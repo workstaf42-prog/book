@@ -542,10 +542,22 @@ def main():
     
     application = Application.builder().token(token).build()
     
-    # Только команда /admin для теста
-    from admin_panel import AdminPanel
+    # Создаем экземпляр админ-панели
     admin_panel = AdminPanel()
+    
+    # Команды
+    application.add_handler(CommandHandler("start", enhanced_start))
+    application.add_handler(CommandHandler("menu", menu_command))
+    application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("admin", admin_panel.admin_start))
     
-    logger.info("Запуск бота только с админ-панелью...")
+    # Обработчики админ-панели
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, admin_panel.handle_admin_message))
+    application.add_handler(CallbackQueryHandler(admin_panel.handle_admin_callback))
+    
+    # Общие обработчики
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_enhanced_message))
+    application.add_handler(CallbackQueryHandler(handle_enhanced_callback))
+    
+    logger.info("Запуск бота...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
