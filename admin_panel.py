@@ -1,3 +1,4 @@
+print(f"DEBUG: AdminPanel loaded. Admin IDs: {self.admin_ids}")
 import sqlite3
 import logging
 from datetime import datetime, timedelta
