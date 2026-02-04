@@ -32,8 +32,10 @@ class AdminPanel:
         print(f"DEBUG: Is admin? {self.is_admin(update.effective_user.id)}")
         
         if not self.is_admin(update.effective_user.id):
-            await update.message.reply_text("⛔ У вас нет доступа к админ-панели")
-            return
+                    await update.message.reply_text(
+            "Админ-панель запущена!",
+            reply_markup=reply_markup
+        )
         
         keyboard = [
             [KeyboardButton("📊 Статистика")],
