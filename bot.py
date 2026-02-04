@@ -542,46 +542,10 @@ def main():
     
     application = Application.builder().token(token).build()
     
-    # Основные команды
-    application.add_handler(CommandHandler("start", enhanced_start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("menu", menu_command))
-    
-    # ✅ ДОБАВЛЕНО: Команда /admin для админ-панели
+    # Только команда /admin для теста
+    from admin_panel import AdminPanel
+    admin_panel = AdminPanel()
     application.add_handler(CommandHandler("admin", admin_panel.admin_start))
     
-    # Команды тестирования
-    from test_integration import test_integration
-    application.add_handler(CommandHandler("test", test_integration.test_menu_command))
-    application.add_handler(CommandHandler("start_test", test_integration.start_test_command))
-    application.add_handler(CommandHandler("adaptive_test", test_integration.adaptive_test_command))
-    
-    # Дополнительные команды
-    setup_commands(application)
-    
-    # Интеграция тестирования
-    setup_test_integration(application)
-    
-    # Обработчики тестирования
-    setup_testing_handlers(application)
-    
-    # Колбэки
-    application.add_handler(CallbackQueryHandler(handle_enhanced_callback))
-    
-    # ✅ ДОБАВЛЕНО: Колбэк для админ-панели
-    application.add_handler(CallbackQueryHandler(admin_panel.handle_admin_callback))
-    
-    # Сообщения
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_enhanced_message))
-    
-    # ✅ ДОБАВЛЕНО: Сообщения для админ-панели (должен быть ПОСЛЕ основного обработчика)
-    # Фильтруем только сообщения от админов, чтобы не мешать основному боту
-    application.add_handler(
-        MessageHandler(
-            filters.TEXT & ~filters.COMMAND, 
-            admin_panel.handle_admin_message
-        )
-    )
-    
-    logger.info("Запуск финальной версии Книжного клуба с ИИ-тестированием...")
+    logger.info("Запуск бота только с админ-панелью...")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
